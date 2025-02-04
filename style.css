@@ -69,3 +69,9 @@ ul {
 
   box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px;
 }
+
+.card--games {
+  margin: 0.2rem;
+  padding: 1rem;
+  border-radius: 5px;
+}

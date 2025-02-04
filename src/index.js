@@ -10,8 +10,12 @@ function getCardImage(card) {
     const cardImage = document.createElement('img')
     cardImage.setAttribute('width', '256')
     cardImage.setAttribute('class', 'card--img')
-    cardImage.setAttribute('src', card.sprites.other['official-artwork'].front_default)
-    // cardImage.setAttribute('src', card.sprites.other.dream_world.front_default)
+    if (typeof(card['currentImage']) == 'string') {
+        cardImage.setAttribute('src', card['currentImage'])
+    } else {
+        cardImage.setAttribute('src', card['availableImages'][card['currentImage']])
+    }
+    
     return cardImage
 }
 
@@ -28,46 +32,93 @@ function getCardStats(card) {
 }
 
 function getGameVersionList(card) {
+    const gamesListDetails = document.createElement('details')
+    gamesListDetails.setAttribute('class', 'card--games')
+    const gamesListDetailsSummary = document.createElement('summary')
+    gamesListDetailsSummary.innerText = 'Appears in games:'
+    gamesListDetails.appendChild(gamesListDetailsSummary)
     const gamesListUL = document.createElement('ul')
-    gamesListUL.setAttribute('class', 'card--games')
-    
+
     for (const game of card.game_indices) {
         const gameLi = document.createElement('li')
         gameLi.innerText = game.version.name
         gamesListUL.appendChild(gameLi)
     }
-    return gamesListUL
+    gamesListDetails.appendChild(gamesListUL)
+    return gamesListDetails
 }
 
-function renderCards(cardsListUL) {
+function getAvailableImages(object) {
+    const imageList = []
+    const keys = Object.keys(object)
+    for (const k of keys) {
+        // console.log(k)
+        if (typeof(object[k]) == 'string') {
+            // if (object[k].slice(-4) == '.png') {
+            imageList.push(object[k])
+            // }
+        } else if (object[k] !== null) {
+            for (const image of getAvailableImages(object[k])) {
+                imageList.push(image)
+            }
+        }
+    }
+    return imageList
+}
+
+function nextImageListener(card) {
+    // console.log(availableImages[Math.floor(Math.random() * availableImages.length)])
+    if (typeof(card['currentImage']) == 'string') {
+        card['currentImage'] = 0
+    } else {
+        card['currentImage'] += 1
+    }
+    renderCards()
+}
+
+function getCardLi(card) {
+    const cardLi = document.createElement('li')
+    cardLi.setAttribute('id', card.id)
+    cardLi.setAttribute('class', 'card')
+
+    cardHeader = getCardHeader(card)
+    cardImage = getCardImage(card)
+    statsListUL = getCardStats(card)
+    gamesListUL = getGameVersionList(card)
+
+    // const gamesListHeader = document.createElement('h3')
+    // gamesListHeader.innerText = 'Has appeared in:'
+
+    cardLi.addEventListener('click', () => {nextImageListener(card)})
+
+    cardLi.appendChild(cardHeader)
+    cardLi.appendChild(cardImage)
+    cardLi.appendChild(statsListUL)
+    // cardLi.appendChild(gamesListHeader)
+    cardLi.appendChild(gamesListUL)
+    return cardLi
+}
+
+function renderCards() {
+    const cardsListUL = document.querySelector('.cards')
     cardsListUL.innerHTML = ''
     // const card = data[0]
     for (const card of data) {
-        const cardLi = document.createElement('li')
-        cardLi.setAttribute('id', card.id)
-        cardLi.setAttribute('class', 'card')
-
-        cardHeader = getCardHeader(card)
-        cardImage = getCardImage(card)
-        statsListUL = getCardStats(card)
-        gamesListUL = getGameVersionList(card)
-
-        const gamesListHeader = document.createElement('h3')
-        gamesListHeader.innerText = 'Has appeared in:'
-
-        cardLi.appendChild(cardHeader)
-        cardLi.appendChild(cardImage)
-        cardLi.appendChild(statsListUL)
-        cardLi.appendChild(gamesListHeader)
-        cardLi.appendChild(gamesListUL)
-
+        cardLi = getCardLi(card)
         cardsListUL.appendChild(cardLi)
     }
 }
 
+function prepareCardImages() {
+    for (card of data) {
+        card['availableImages'] = getAvailableImages(card)
+        card['currentImage'] = card.sprites.other['official-artwork'].front_default
+    }
+}
+
 function main() {
-    const cardsListUL = document.querySelector('.cards')
-    renderCards(cardsListUL)
+    prepareCardImages()
+    renderCards()
 }
 
 main()
