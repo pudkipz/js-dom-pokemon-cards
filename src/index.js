@@ -54,9 +54,10 @@ function getAvailableImages(object) {
     for (const k of keys) {
         // console.log(k)
         if (typeof(object[k]) == 'string') {
-            // if (object[k].slice(-4) == '.png') {
+            // if (k == 'front_default') {
+            if (object[k].slice(-4) == '.gif') {
             imageList.push(object[k])
-            // }
+            }
         } else if (object[k] !== null) {
             for (const image of getAvailableImages(object[k])) {
                 imageList.push(image)
@@ -71,7 +72,8 @@ function nextImageListener(card) {
     if (typeof(card['currentImage']) == 'string') {
         card['currentImage'] = 0
     } else {
-        card['currentImage'] += 1
+        card['currentImage'] = (card['currentImage'] + 1) % card['availableImages'].length
+
     }
     renderCards()
 }
