@@ -91,7 +91,7 @@ function getCardLi(card) {
     // const gamesListHeader = document.createElement('h3')
     // gamesListHeader.innerText = 'Has appeared in:'
 
-    cardLi.addEventListener('click', () => {nextImageListener(card)})
+    cardImage.addEventListener('click', () => {nextImageListener(card)})
 
     cardLi.appendChild(cardHeader)
     cardLi.appendChild(cardImage)
